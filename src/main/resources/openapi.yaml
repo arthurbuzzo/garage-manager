@@ -1,0 +1,256 @@
+openapi: 3.0.3
+info:
+  title: Sistema de Gestão de Estacionamentos
+  description: API para gerenciamento de vagas, entrada/saída de veículos e faturamento
+  version: 1.0.0
+servers:
+  - url: http://localhost:3003
+    description: Servidor local
+
+paths:
+  /webhook:
+    post:
+      tags:
+        - Webhook
+      summary: Recebe eventos de entrada, estacionamento e saída
+      operationId: receiveWebhookEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookEvent'
+      responses:
+        '200':
+          description: Evento processado com sucesso
+        '400':
+          description: Requisição inválida
+
+  /garage:
+    get:
+      tags:
+        - Garage
+      summary: Obtém configuração da garagem
+      operationId: getGarageConfig
+      responses:
+        '200':
+          description: Configuração da garagem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GarageConfig'
+
+  /plate-status:
+    post:
+      tags:
+        - Query
+      summary: Consulta status de uma placa
+      operationId: getPlateStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlateStatusRequest'
+      responses:
+        '200':
+          description: Status da placa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlateStatusResponse'
+        '404':
+          description: Placa não encontrada
+
+  /spot-status:
+    post:
+      tags:
+        - Query
+      summary: Consulta status de uma vaga
+      operationId: getSpotStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpotStatusRequest'
+      responses:
+        '200':
+          description: Status da vaga
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpotStatusResponse'
+        '404':
+          description: Vaga não encontrada
+
+  /revenue:
+    get:
+      tags:
+        - Revenue
+      summary: Consulta faturamento
+      operationId: getRevenue
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: sector
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Faturamento do setor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueResponse'
+
+components:
+  schemas:
+    WebhookEvent:
+      type: object
+      required:
+        - event_type
+      properties:
+        license_plate:
+          type: string
+          example: "ZUL0001"
+        entry_time:
+          type: string
+          format: date-time
+        exit_time:
+          type: string
+          format: date-time
+        lat:
+          type: number
+          format: double
+        lng:
+          type: number
+          format: double
+        event_type:
+          type: string
+          enum: [ENTRY, PARKED, EXIT]
+      discriminator:
+        propertyName: event_type
+
+    GarageConfig:
+      type: object
+      properties:
+        garage:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sector'
+        spots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Spot'
+
+    Sector:
+      type: object
+      properties:
+        sector:
+          type: string
+        basePrice:
+          type: number
+          format: double
+        max_capacity:
+          type: integer
+        open_hour:
+          type: string
+          pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'
+        close_hour:
+          type: string
+          pattern: '^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'
+        duration_limit_minutes:
+          type: integer
+
+    Spot:
+      type: object
+      properties:
+        id:
+          type: integer
+        sector:
+          type: string
+        lat:
+          type: number
+          format: double
+        lng:
+          type: number
+          format: double
+
+    PlateStatusRequest:
+      type: object
+      required:
+        - license_plate
+      properties:
+        license_plate:
+          type: string
+
+    PlateStatusResponse:
+      type: object
+      properties:
+        license_plate:
+          type: string
+        price_until_now:
+          type: number
+          format: double
+        entry_time:
+          type: string
+          format: date-time
+        time_parked:
+          type: string
+          format: date-time
+        lat:
+          type: number
+          format: double
+        lng:
+          type: number
+          format: double
+
+    SpotStatusRequest:
+      type: object
+      required:
+        - lat
+        - lng
+      properties:
+        lat:
+          type: number
+          format: double
+        lng:
+          type: number
+          format: double
+
+    SpotStatusResponse:
+      type: object
+      properties:
+        ocupied:
+          type: boolean
+        license_plate:
+          type: string
+        price_until_now:
+          type: number
+          format: double
+        entry_time:
+          type: string
+          format: date-time
+        time_parked:
+          type: string
+          format: date-time
+
+    RevenueResponse:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+          default: "BRL"
+        timestamp:
+          type: string
+          format: date-time
