@@ -5,7 +5,7 @@ codigo mantendo assim mais legivel o que se mostrou no resultado final bem posit
 O banco de dados para simplificação dos testes foi utilizado o H2, porem a aplicação foi desenvolvida para ser agnostica ao banco de dados, sendo assim apenas necessário alterar a string de conexão para o postgree ou mysql.
 Foi optado também pela aplicação do conceito de API First onde o contrato é criado primeiro, tornando-se o responsavel pela geração do código e interfaces do contrato, permitindo assim a automação deste sem a necessidade de criação desses objetos e interfaces. 
 
-##Importante
+## Importante
 Devido a limitação de tempo do candidato para a elaboração do teste não foi possivel despender o tempo necessário para conclusão do teste, de forma que fosse garantido que todas as regras de negocio estão funcionais e sem nenhum bug, mas de forma geral esta funcional, e fica aqui a principal ideia que é a demonstração do uso das ferramentas escolhidas e a aplicação da Arquitetura Hexagonal. 
 Os testes unitários também não foram desenvolvidos pelo motivo relatado, porem seria o proximo passado. 
 Melhorias pontuais também são aplicaveis, como algumas refatorações de código a fim de melhorar as responsabilidades de cada camada e a escrita de codigo, como por exemplo a utilização de conversores para entidades e domains o que reduziria consideravelmente o codigo escrito. 
